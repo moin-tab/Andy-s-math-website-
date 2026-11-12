@@ -1,0 +1,2346 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高一數學：直線與圓進階幾何實驗室</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans TC & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- KaTeX for publication-grade math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Custom scrollbar & range slider styling for crisp academic UI */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 9999px;
+      background: #334155;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: 2px solid #0f172a;
+      margin-top: -5px;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+    .katex-display {
+      margin: 0.4em 0 !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 2px;
+    }
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .canvas-touch-lock {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-sky-500/30 selection:text-sky-200">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <!-- Geometric SVG Logo -->
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="3" y1="21" x2="21" y2="3" stroke-dasharray="2 2" />
+            <line x1="15.95" y1="6.05" x2="21" y2="11.1" />
+            <circle cx="15.95" cy="6.05" r="1.5" fill="currentColor" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">高一數學：直線與圓進階幾何實驗室</h1>
+            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-500/15 text-sky-300 border border-sky-500/30">
+              108課綱進階專題
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">拖曳畫布控制點與調整參數滑桿，即時觀察代數推導與動態幾何變化</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div id="cursor-coords" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/80 text-xs font-mono text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>游標座標：(0.0, 0.0)</span>
+        </div>
+        <button id="btn-reset-module" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 border border-slate-700 text-xs sm:text-sm font-medium transition flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          <span>重設實驗參數</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 6-Module Navigation Bar -->
+    <nav class="border-t border-slate-800/80 bg-slate-900/60">
+      <div id="module-tabs" class="max-w-[1600px] mx-auto px-3 sm:px-6 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <!-- Tabs injected via JS -->
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Interactive Workspace -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+    <!-- Left Column: Interactive Geometry Canvas (7 cols on large screens) -->
+    <section class="lg:col-span-7 flex flex-col gap-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+        <!-- Canvas Toolbar -->
+        <div class="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span id="canvas-badge" class="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              互動幾何畫布
+            </span>
+            <span id="canvas-hint" class="text-xs text-slate-400">拖曳發光控制點以改變位置</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="btn-zoom-out" title="縮小畫布" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button id="btn-zoom-reset" title="重置視角與縮放" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 border border-slate-700 transition">
+              100%
+            </button>
+            <button id="btn-zoom-in" title="放大畫布" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas -->
+        <div id="single-canvas-wrapper" class="relative w-full h-[380px] sm:h-[480px] lg:h-[560px] bg-[#080d1a]">
+          <canvas id="main-canvas" class="w-full h-full block canvas-touch-lock"></canvas>
+          <!-- Floating Legend Overlay -->
+          <div id="canvas-legend" class="pointer-events-none absolute bottom-3 left-3 right-3 flex flex-wrap gap-2 text-xs"></div>
+        </div>
+
+        
+      </div>
+
+      <!-- Key Exam Concept Card under Canvas -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-lg">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">★</span>
+          <h3 class="text-sm font-bold text-slate-200">段考與學測核心觀念剖析</h3>
+        </div>
+        <div id="concept-notes" class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-1.5"></div>
+      </div>
+    </section>
+
+    <!-- Right Column: Controls & Real-Time Formula Dashboard (5 cols on large screens) -->
+    <section class="lg:col-span-5 flex flex-col gap-4">
+      <!-- Parameter Controls Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-5 rounded-full bg-sky-400"></span>
+            <span>參數控制與快捷實驗情境</span>
+          </h2>
+        </div>
+        <div id="controls-panel" class="space-y-4">
+          <!-- Module-specific sliders and buttons injected here -->
+        </div>
+      </div>
+
+      <!-- Real-Time Algebra Derivation & Metrics Dashboard -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-5 rounded-full bg-emerald-400"></span>
+            <span>即時公式推導與數值儀表板</span>
+          </h2>
+          <span id="status-pill" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            狀態計算中
+          </span>
+        </div>
+
+        <!-- Warning Alert Banner (used dynamically for traps/special degenerations) -->
+        <div id="alert-banner" class="hidden mb-3 p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs sm:text-sm leading-relaxed"></div>
+
+        <!-- Live Metrics Grid -->
+        <div id="metrics-grid" class="grid grid-cols-2 gap-2.5 mb-4">
+          <!-- Key-value cards injected dynamically -->
+        </div>
+
+        <!-- Step-by-Step KaTeX Formulas -->
+        <div id="math-derivation" class="space-y-3 text-sm">
+          <!-- KaTeX blocks injected dynamically -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /**
+     * ============================================================================
+     * 數學計算與格式化工具庫 (Math & Formatting Utilities)
+     * ============================================================================
+     */
+    const MathUtils = {
+      EPS: 1e-6,
+
+      // Normalize near-zero floating point numbers to avoid "-0.00"
+      clean(val, eps = 1e-6) {
+        return Math.abs(val) < eps ? 0 : val;
+      },
+
+      // Format number to fixed decimals without trailing "-0"
+      fmt(val, digits = 2) {
+        const c = this.clean(val, Math.pow(10, -digits - 2));
+        const s = c.toFixed(digits);
+        return s === '-0.00' || s === '-0.0' || s === '-0' ? s.replace('-', '') : s;
+      },
+
+      // Format coefficient for algebraic terms (e.g. "+ 3x", "- x", "")
+      term(coeff, variable, isFirst = false, digits = 2) {
+        const c = this.clean(coeff, 1e-4);
+        if (c === 0) return '';
+        const absVal = Math.abs(c);
+        const sign = c < 0 ? (isFirst ? '-' : ' - ') : (isFirst ? '' : ' + ');
+        const numStr = (variable && Math.abs(absVal - 1) < 1e-4) ? '' : this.fmt(absVal, digits);
+        return `${sign}${numStr}${variable}`;
+      },
+
+      // Format (x - h) or (x + h)
+      shiftVar(varName, center, digits = 2) {
+        const h = this.clean(center, 1e-4);
+        if (h === 0) return varName;
+        return h > 0 ? `(${varName} - ${this.fmt(h, digits)})` : `(${varName} + ${this.fmt(Math.abs(h), digits)})`;
+      },
+
+      // Format general line equation Ax + By + C = 0
+      formatLine(A, B, C, digits = 2) {
+        let str = '';
+        const tA = this.term(A, 'x', true, digits);
+        str += tA;
+        const tB = this.term(B, 'y', str === '', digits);
+        str += tB;
+        const tC = this.term(C, '', str === '', digits);
+        str += tC;
+        return (str || '0') + ' = 0';
+      },
+
+      // Format circle general equation x^2 + y^2 + dx + ey + f = 0
+      formatCircleGeneral(d, e, f, digits = 2) {
+        let str = 'x^2 + y^2';
+        str += this.term(d, 'x', false, digits);
+        str += this.term(e, 'y', false, digits);
+        str += this.term(f, '', false, digits);
+        return str + ' = 0';
+      },
+
+      // "a - b"：b 為負時改寫成 "a + |b|"，避免出現 "- -2.0"
+      sub(a, b, digits = 2) {
+        const bb = this.clean(b, 1e-4);
+        return bb < 0
+          ? `${this.fmt(a, digits)} + ${this.fmt(-bb, digits)}`
+          : `${this.fmt(a, digits)} - ${this.fmt(bb, digits)}`;
+      },
+
+      // Distance between two points
+      dist(x1, y1, x2, y2) {
+        return Math.hypot(x2 - x1, y2 - y1);
+      },
+
+      // Intersect infinite line Ax + By + C = 0 with circle (h, k, r)
+      intersectLineCircle(A, B, C, h, k, r) {
+        const norm2 = A * A + B * B;
+        if (norm2 < 1e-10) return [];
+        const d0 = (A * h + B * k + C) / Math.sqrt(norm2);
+        if (Math.abs(d0) > r + 1e-6) return [];
+        // Foot of perpendicular from (h, k) to line
+        const val = A * h + B * k + C;
+        const fx = h - (A * val) / norm2;
+        const fy = k - (B * val) / norm2;
+        const chordHalf = Math.sqrt(Math.max(0, r * r - d0 * d0));
+        if (chordHalf < 1e-6) return [{ x: fx, y: fy }];
+        const ux = -B / Math.sqrt(norm2);
+        const uy = A / Math.sqrt(norm2);
+        return [
+          { x: fx + chordHalf * ux, y: fy + chordHalf * uy },
+          { x: fx - chordHalf * ux, y: fy - chordHalf * uy },
+        ];
+      },
+
+      // Intersect two lines A1 x + B1 y + C1 = 0 and A2 x + B2 y + C2 = 0
+      intersectLines(A1, B1, C1, A2, B2, C2) {
+        const det = A1 * B2 - A2 * B1;
+        if (Math.abs(det) < 1e-8) return null;
+        return {
+          x: (B1 * C2 - B2 * C1) / det,
+          y: (C1 * A2 - C2 * A1) / det,
+        };
+      },
+    };
+
+    /**
+     * Safe KaTeX rendering helper
+     */
+    function renderKaTeX(el, latex, displayMode = true) {
+      if (!el) return;
+      if (window.katex) {
+        try {
+          window.katex.render(latex, el, {
+            throwOnError: false,
+            displayMode,
+          });
+        } catch (err) {
+          el.textContent = latex;
+        }
+      } else {
+        el.textContent = latex;
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 2D 座標畫布渲染引擎 (High-DPI Coordinate Canvas Renderer)
+     * ============================================================================
+     */
+    /** 將元素內 $...$ 轉成 KaTeX（取代原本重複 6 次的 regex 區塊） */
+    function renderInlineMath(el) {
+      if (!el || !window.katex) return;
+      const dec = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      el.innerHTML = el.innerHTML.replace(/\$([^$]+)\$/g, (_, tex) => {
+        try { return window.katex.renderToString(dec(tex), { throwOnError: false }); } catch (e) { return tex; }
+      });
+    }
+
+    /** 同步滑桿與其數值標籤（拖曳 / 預設按鈕改動狀態後使用） */
+    function syncInput(id, value, labelId, text) {
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+      const lb = labelId && document.getElementById(labelId);
+      if (lb) lb.textContent = text !== undefined ? text : value;
+    }
+
+    class CoordinateViewport {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.baseScale = 38; // pixels per math unit
+        this.zoom = 1.0;
+        this.panX = 0;
+        this.panY = 0;
+        this.width = 0;
+        this.height = 0;
+        this.dpr = window.devicePixelRatio || 1;
+      }
+
+      get scale() {
+        return this.baseScale * this.zoom;
+      }
+
+      resize() {
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        this.width = Math.max(200, rect.width);
+        this.height = Math.max(200, rect.height);
+        this.dpr = window.devicePixelRatio || 1;
+        this.canvas.width = Math.round(this.width * this.dpr);
+        this.canvas.height = Math.round(this.height * this.dpr);
+        this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+        // Adapt baseScale slightly on smaller mobile viewports
+        this.baseScale = this.width < 480 ? 28 : 38;
+      }
+
+      resetView() {
+        this.zoom = 1.0;
+        this.panX = 0;
+        this.panY = 0;
+      }
+
+      toScreen(wx, wy) {
+        const cx = this.width / 2 + this.panX;
+        const cy = this.height / 2 + this.panY;
+        return {
+          x: cx + wx * this.scale,
+          y: cy - wy * this.scale,
+        };
+      }
+
+      toWorld(sx, sy) {
+        const cx = this.width / 2 + this.panX;
+        const cy = this.height / 2 + this.panY;
+        return {
+          x: (sx - cx) / this.scale,
+          y: (cy - sy) / this.scale,
+        };
+      }
+
+      clear() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        this.ctx.fillStyle = '#080d1a';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+      }
+
+      drawGrid() {
+        const ctx = this.ctx;
+        const s = this.scale;
+        const topLeft = this.toWorld(0, 0);
+        const bottomRight = this.toWorld(this.width, this.height);
+
+        const minX = Math.floor(topLeft.x) - 1;
+        const maxX = Math.ceil(bottomRight.x) + 1;
+        const minY = Math.floor(bottomRight.y) - 1;
+        const maxY = Math.ceil(topLeft.y) + 1;
+
+        const step = s < 20 ? 2 : 1;
+
+        // Grid lines
+        for (let x = minX; x <= maxX; x++) {
+          const sx = this.toScreen(x, 0).x;
+          ctx.beginPath();
+          ctx.moveTo(sx, 0);
+          ctx.lineTo(sx, this.height);
+          ctx.strokeStyle = x === 0 ? 'rgba(148, 163, 184, 0.55)' : (x % 5 === 0 ? 'rgba(51, 65, 85, 0.65)' : 'rgba(30, 41, 59, 0.55)');
+          ctx.lineWidth = x === 0 ? 1.5 : 1;
+          ctx.stroke();
+
+          if (x !== 0 && x % step === 0) {
+            const originY = Math.min(Math.max(this.toScreen(0, 0).y, 14), this.height - 16);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(String(x), sx, originY + 14);
+          }
+        }
+
+        for (let y = minY; y <= maxY; y++) {
+          const sy = this.toScreen(0, y).y;
+          ctx.beginPath();
+          ctx.moveTo(0, sy);
+          ctx.lineTo(this.width, sy);
+          ctx.strokeStyle = y === 0 ? 'rgba(148, 163, 184, 0.55)' : (y % 5 === 0 ? 'rgba(51, 65, 85, 0.65)' : 'rgba(30, 41, 59, 0.55)');
+          ctx.lineWidth = y === 0 ? 1.5 : 1;
+          ctx.stroke();
+
+          if (y !== 0 && y % step === 0) {
+            const originX = Math.min(Math.max(this.toScreen(0, 0).x, 22), this.width - 14);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(String(y), originX - 6, sy + 4);
+          }
+        }
+
+        // Origin label
+        const o = this.toScreen(0, 0);
+        if (o.x >= 0 && o.x <= this.width && o.y >= 0 && o.y <= this.height) {
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '11px "JetBrains Mono", monospace';
+          ctx.textAlign = 'right';
+          ctx.fillText('O', o.x - 6, o.y + 14);
+        }
+      }
+
+      drawCircle(h, k, r, options = {}) {
+        if (r <= 0 || !isFinite(r)) return;
+        const ctx = this.ctx;
+        const center = this.toScreen(h, k);
+        const radPx = r * this.scale;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, radPx, 0, Math.PI * 2);
+        if (options.fill) {
+          ctx.fillStyle = options.fill;
+          ctx.fill();
+        }
+        ctx.strokeStyle = options.color || '#38bdf8';
+        ctx.lineWidth = options.lineWidth || 2.2;
+        if (options.dashed) ctx.setLineDash([6, 5]);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw infinite line Ax + By + C = 0 clipped cleanly across canvas
+      drawInfiniteLine(A, B, C, options = {}) {
+        const norm = Math.hypot(A, B);
+        if (norm < 1e-8) return;
+        const ctx = this.ctx;
+        const topLeft = this.toWorld(0, 0);
+        const bottomRight = this.toWorld(this.width, this.height);
+        const pad = 2;
+        const xMin = topLeft.x - pad;
+        const xMax = bottomRight.x + pad;
+        const yMin = bottomRight.y - pad;
+        const yMax = topLeft.y + pad;
+
+        let p1, p2;
+        if (Math.abs(B) > Math.abs(A)) {
+          p1 = this.toScreen(xMin, (-C - A * xMin) / B);
+          p2 = this.toScreen(xMax, (-C - A * xMax) / B);
+        } else {
+          p1 = this.toScreen((-C - B * yMin) / A, yMin);
+          p2 = this.toScreen((-C - B * yMax) / A, yMax);
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = options.color || '#34d399';
+        ctx.lineWidth = options.lineWidth || 2.4;
+        if (options.dashed) ctx.setLineDash(options.dashPattern || [7, 5]);
+        ctx.stroke();
+        ctx.restore();
+
+        if (options.label) {
+          // Place label neatly along visible segment
+          const midX = (p1.x + p2.x) * 0.5;
+          const midY = (p1.y + p2.y) * 0.5;
+          this.drawBadgeText(options.label, midX + 10, midY - 10, options.color || '#34d399');
+        }
+      }
+
+      drawSegment(x1, y1, x2, y2, options = {}) {
+        const ctx = this.ctx;
+        const p1 = this.toScreen(x1, y1);
+        const p2 = this.toScreen(x2, y2);
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = options.color || '#fbbf24';
+        ctx.lineWidth = options.lineWidth || 2;
+        if (options.dashed) ctx.setLineDash(options.dashPattern || [5, 4]);
+        ctx.stroke();
+        ctx.restore();
+
+        if (options.label) {
+          const mx = (p1.x + p2.x) / 2;
+          const my = (p1.y + p2.y) / 2;
+          this.drawBadgeText(options.label, mx + (options.labelOffsetX || 6), my + (options.labelOffsetY || -8), options.color || '#fbbf24');
+        }
+      }
+
+      drawRightAngle(vx, vy, p1x, p1y, p2x, p2y, sizePx = 11, color = '#94a3b8') {
+        const v = this.toScreen(vx, vy);
+        const s1 = this.toScreen(p1x, p1y);
+        const s2 = this.toScreen(p2x, p2y);
+        const d1 = Math.hypot(s1.x - v.x, s1.y - v.y);
+        const d2 = Math.hypot(s2.x - v.x, s2.y - v.y);
+        if (d1 < 1e-4 || d2 < 1e-4) return;
+        const u1x = ((s1.x - v.x) / d1) * sizePx;
+        const u1y = ((s1.y - v.y) / d1) * sizePx;
+        const u2x = ((s2.x - v.x) / d2) * sizePx;
+        const u2y = ((s2.y - v.y) / d2) * sizePx;
+
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(v.x + u1x, v.y + u1y);
+        ctx.lineTo(v.x + u1x + u2x, v.y + u1y + u2y);
+        ctx.lineTo(v.x + u2x, v.y + u2y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      drawPoint(wx, wy, options = {}) {
+        const ctx = this.ctx;
+        const p = this.toScreen(wx, wy);
+        const color = options.color || '#38bdf8';
+        const r = options.radius || (options.draggable ? 6.5 : 4.5);
+
+        ctx.save();
+        if (options.draggable) {
+          // Outer interactive halo
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r + 7, 0, Math.PI * 2);
+          ctx.fillStyle = options.haloColor || 'rgba(56, 189, 248, 0.22)';
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#0f172a';
+        ctx.stroke();
+        ctx.restore();
+
+        if (options.label) {
+          ctx.save();
+          ctx.font = 'bold 12px "Noto Sans TC", "JetBrains Mono", sans-serif';
+          ctx.textAlign = 'left'; // drawGrid 會把 textAlign 留在 right，必須重設
+          const ox = options.offsetX !== undefined ? options.offsetX : 10;
+          const oy = options.offsetY !== undefined ? options.offsetY : -10;
+          // Subtle dark backing for high legibility
+          const textWidth = ctx.measureText(options.label).width;
+          ctx.fillStyle = 'rgba(8, 13, 26, 0.78)';
+          ctx.fillRect(p.x + ox - 3, p.y + oy - 12, textWidth + 6, 16);
+          ctx.fillStyle = color;
+          ctx.fillText(options.label, p.x + ox, p.y + oy);
+          ctx.restore();
+        }
+      }
+
+      drawBadgeText(text, sx, sy, color = '#e2e8f0') {
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.font = '600 11px "Noto Sans TC", "JetBrains Mono", sans-serif';
+        ctx.textAlign = 'left';
+        const w = ctx.measureText(text).width;
+        const cx = Math.min(Math.max(sx, 8), this.width - w - 12);
+        const cy = Math.min(Math.max(sy, 18), this.height - 8);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(cx - 4, cy - 12, w + 8, 17, 4); else ctx.rect(cx - 4, cy - 12, w + 8, 17);
+        ctx.fill();
+        ctx.fillStyle = color;
+        ctx.fillText(text, cx, cy);
+        ctx.restore();
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 六大互動教學模組定義 (6 Interactive Geometry Modules)
+     * ============================================================================
+     */
+    const Modules = [
+      // --------------------------------------------------------------------------
+      // 模組一：「換一半」公式大一統（切線、切點弦與極線）
+      // --------------------------------------------------------------------------
+      {
+        id: 1,
+        shortTitle: '01 換一半大一統',
+        fullTitle: '「換一半」公式大一統：切線、切點弦與極線',
+        hint: '拖曳點 P(x₀, y₀) 穿越圓周內外，觀察「換一半」直線的三種身份變換',
+        defaultState() {
+          return { h: 0, k: 0, r: 4, px: 6, py: 2 };
+        },
+        state: null,
+        init() {
+          this.state = this.defaultState();
+        },
+        reset() {
+          this.state = this.defaultState();
+        },
+        getDraggablePoints() {
+          return [
+            { id: 'P', x: this.state.px, y: this.state.py },
+            { id: 'C', x: this.state.h, y: this.state.k },
+          ];
+        },
+        onDragPoint(id, wx, wy) {
+          // Round lightly to 0.1 for clean numbers while staying smooth
+          const rx = Math.round(wx * 10) / 10;
+          const ry = Math.round(wy * 10) / 10;
+          if (id === 'P') {
+            // Slight magnetic snap to circle circumference
+            const d = MathUtils.dist(rx, ry, this.state.h, this.state.k);
+            if (Math.abs(d - this.state.r) < 0.14 && d > 0.1) {
+              const ang = Math.atan2(ry - this.state.k, rx - this.state.h);
+              this.state.px = this.state.h + this.state.r * Math.cos(ang);
+              this.state.py = this.state.k + this.state.r * Math.sin(ang);
+            } else {
+              this.state.px = rx;
+              this.state.py = ry;
+            }
+          } else if (id === 'C') {
+            this.state.h = Math.round(wx * 2) / 2;
+            this.state.k = Math.round(wy * 2) / 2;
+            syncInput('m1-h', this.state.h, 'm1-val-h');
+            syncInput('m1-k', this.state.k, 'm1-val-k');
+          }
+        },
+        renderControls(container, onUpdate) {
+          const s = this.state;
+          container.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">圓心 h</span>
+                  <span class="font-mono text-sky-300" id="m1-val-h">${s.h}</span>
+                </div>
+                <input type="range" id="m1-h" min="-4" max="4" step="0.5" value="${s.h}" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">圓心 k</span>
+                  <span class="font-mono text-sky-300" id="m1-val-k">${s.k}</span>
+                </div>
+                <input type="range" id="m1-k" min="-4" max="4" step="0.5" value="${s.k}" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">半徑 r</span>
+                  <span class="font-mono text-sky-300" id="m1-val-r">${s.r}</span>
+                </div>
+                <input type="range" id="m1-r" min="1.5" max="6" step="0.5" value="${s.r}" class="w-full" />
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button id="m1-snap-circle" class="px-3 py-1.5 rounded-lg bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition">
+                🎯 吸附 P 至圓周（切線）
+              </button>
+              <button id="m1-preset-out" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs transition">
+                圓外點（切點弦）
+              </button>
+              <button id="m1-preset-in" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs transition">
+                圓內點（極線證明）
+              </button>
+            </div>
+          `;
+
+          ['h', 'k', 'r'].forEach((key) => {
+            const el = document.getElementById(`m1-${key}`);
+            el.addEventListener('input', (e) => {
+              this.state[key] = parseFloat(e.target.value);
+              document.getElementById(`m1-val-${key}`).textContent = this.state[key];
+              onUpdate();
+            });
+          });
+
+          document.getElementById('m1-snap-circle').addEventListener('click', () => {
+            const { h, k, r, px, py } = this.state;
+            let ang = Math.atan2(py - k, px - h);
+            if (MathUtils.dist(px, py, h, k) < 1e-4) ang = Math.PI / 6;
+            this.state.px = h + r * Math.cos(ang);
+            this.state.py = k + r * Math.sin(ang);
+            onUpdate();
+          });
+
+          document.getElementById('m1-preset-out').addEventListener('click', () => {
+            this.state.px = this.state.h + this.state.r * 1.5;
+            this.state.py = this.state.k + this.state.r * 0.5;
+            onUpdate();
+          });
+
+          document.getElementById('m1-preset-in').addEventListener('click', () => {
+            this.state.px = this.state.h + this.state.r * 0.4;
+            this.state.py = this.state.k + this.state.r * 0.25;
+            onUpdate();
+          });
+        },
+        render(vp) {
+          const { h, k, r, px, py } = this.state;
+          vp.clear();
+          vp.drawGrid();
+
+          // Base Circle
+          vp.drawCircle(h, k, r, {
+            color: '#38bdf8',
+            fill: 'rgba(56, 189, 248, 0.06)',
+            lineWidth: 2.5,
+          });
+
+          const dist = MathUtils.dist(px, py, h, k);
+          // Half-substitution line: (px - h)(x - h) + (py - k)(y - k) = r^2
+          const A = px - h;
+          const B = py - k;
+          const C = -A * h - B * k - r * r;
+
+          const legendEl = document.getElementById('canvas-legend');
+
+          if (dist > r + 0.03) {
+            // Case 1: P is OUTSIDE circle -> Chord of Contact (切點弦)
+            const ang = Math.atan2(py - k, px - h);
+            const beta = Math.acos(r / dist);
+            const t1 = { x: h + r * Math.cos(ang + beta), y: k + r * Math.sin(ang + beta) };
+            const t2 = { x: h + r * Math.cos(ang - beta), y: k + r * Math.sin(ang - beta) };
+
+            // Tangent segments PT1 & PT2
+            vp.drawSegment(px, py, t1.x, t1.y, { color: '#fbbf24', dashed: true, lineWidth: 1.8 });
+            vp.drawSegment(px, py, t2.x, t2.y, { color: '#fbbf24', dashed: true, lineWidth: 1.8 });
+
+            // Half-sub line passing through T1 and T2
+            vp.drawInfiniteLine(A, B, C, { color: '#34d399', lineWidth: 2.6, label: '切點弦 L' });
+
+            vp.drawPoint(t1.x, t1.y, { color: '#fbbf24', radius: 4.5, label: 'T₁' });
+            vp.drawPoint(t2.x, t2.y, { color: '#fbbf24', radius: 4.5, label: 'T₂' });
+
+            legendEl.innerHTML = `
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-emerald-500/40 text-emerald-300">━━ 綠色實線：切點弦（精準通過兩切點 T₁, T₂）</span>
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-amber-500/40 text-amber-300">┄┄ 黃色虛線：過 P 點之兩條切線</span>
+            `;
+          } else if (Math.abs(dist - r) <= 0.03) {
+            // Case 2: P is ON circle -> Tangent Line (切線)
+            vp.drawSegment(h, k, px, py, { color: '#94a3b8', dashed: true, lineWidth: 1.6 });
+            vp.drawInfiniteLine(A, B, C, { color: '#34d399', lineWidth: 2.8, label: '切線 L' });
+
+            // Right angle symbol
+            const tx = px - B * 0.4;
+            const ty = py + A * 0.4;
+            vp.drawRightAngle(px, py, h, k, tx, ty, 11, '#34d399');
+
+            legendEl.innerHTML = `
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-emerald-500/40 text-emerald-300">━━ 綠色實線：過圓上一點 P 之切線（垂直於半徑 CP）</span>
+            `;
+          } else if (dist > 0.05) {
+            // Case 3: P is INSIDE circle -> Polar Line (極線)
+            vp.drawInfiniteLine(A, B, C, { color: '#c084fc', lineWidth: 2.6, label: '極線 L (Polar)' });
+
+            // Construct two chords passing through P to visualize pole-polar duality
+            const baseAng = Math.atan2(py - k, px - h);
+            [0.85, -0.75].forEach((offset, idx) => {
+              const dirAng = baseAng + Math.PI / 2 + offset;
+              const lA = -Math.sin(dirAng);
+              const lB = Math.cos(dirAng);
+              const lC = -(lA * px + lB * py);
+              const pts = MathUtils.intersectLineCircle(lA, lB, lC, h, k, r);
+              if (pts.length === 2) {
+                const [qA, qB] = pts;
+                vp.drawSegment(qA.x, qA.y, qB.x, qB.y, { color: 'rgba(148, 163, 184, 0.65)', lineWidth: 1.4 });
+                // Tangents at qA and qB
+                const tA_A = qA.x - h, tA_B = qA.y - k, tA_C = -tA_A * h - tA_B * k - r * r;
+                const tB_A = qB.x - h, tB_B = qB.y - k, tB_C = -tB_A * h - tB_B * k - r * r;
+                const inter = MathUtils.intersectLines(tA_A, tA_B, tA_C, tB_A, tB_B, tB_C);
+                if (inter && Math.hypot(inter.x, inter.y) < 40) {
+                  vp.drawSegment(qA.x, qA.y, inter.x, inter.y, { color: 'rgba(244, 114, 182, 0.55)', dashed: true, lineWidth: 1.3 });
+                  vp.drawSegment(qB.x, qB.y, inter.x, inter.y, { color: 'rgba(244, 114, 182, 0.55)', dashed: true, lineWidth: 1.3 });
+                  vp.drawPoint(inter.x, inter.y, { color: '#f472b6', radius: 4, label: `Q${idx + 1}` });
+                }
+              }
+            });
+
+            legendEl.innerHTML = `
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-purple-500/40 text-purple-300">━━ 紫色實線：極線 L</span>
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-pink-500/40 text-pink-300">● 粉紅點 Q₁, Q₂：過 P 之割線端點切線交點（必落在極線 L 上）</span>
+            `;
+          } else {
+            legendEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-slate-900/90 border border-rose-500/40 text-rose-300">P 點位於圓心時，拆半代換得 0 = r²（無實數直線）</span>`;
+          }
+
+          vp.drawPoint(h, k, { color: '#38bdf8', draggable: true, label: `圓心(${MathUtils.fmt(h, 1)}, ${MathUtils.fmt(k, 1)})`, offsetY: 16 });
+          vp.drawPoint(px, py, { color: '#f43f5e', haloColor: 'rgba(244, 63, 94, 0.25)', draggable: true, label: `P(${MathUtils.fmt(px, 2)}, ${MathUtils.fmt(py, 2)})` });
+        },
+        updateDashboard() {
+          const { h, k, r, px, py } = this.state;
+          const dist = MathUtils.dist(px, py, h, k);
+          const A = px - h;
+          const B = py - k;
+          const C = -A * h - B * k - r * r;
+
+          const statusPill = document.getElementById('status-pill');
+          const alertBanner = document.getElementById('alert-banner');
+          alertBanner.classList.add('hidden');
+
+          let modeName = '';
+          if (dist > r + 0.03) {
+            modeName = 'P 在圓外 → 切點弦方程式';
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+          } else if (Math.abs(dist - r) <= 0.03) {
+            modeName = 'P 在圓上 → 圓的切線方程式';
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          } else if (dist < 0.05) {
+            modeName = 'P 在圓心：換一半後 0 = r²（無直線）';
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+          } else {
+            modeName = 'P 在圓內 → 極線 (Polar) 方程式';
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40';
+          }
+          statusPill.textContent = modeName;
+
+          document.getElementById('metrics-grid').innerHTML = `
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">圓心到 P 距離 d(C, P)</div>
+              <div class="text-base font-mono font-bold text-white mt-0.5">${MathUtils.fmt(dist, 2)} <span class="text-xs font-normal text-slate-400">(r = ${r})</span></div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">幾何身份判別</div>
+              <div class="text-sm font-bold text-sky-300 mt-0.5">${dist > r + 0.03 ? '切點弦 (Chord of Contact)' : Math.abs(dist - r) <= 0.03 ? '切線 (Tangent)' : '極線 (Polar)'}</div>
+            </div>
+          `;
+
+          const derivEl = document.getElementById('math-derivation');
+          derivEl.innerHTML = `
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div class="text-xs text-slate-400 mb-1">1. 圓標準式與「換一半」公式架構：</div>
+              <div id="m1-tex-1"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div class="text-xs text-slate-400 mb-1">2. 代入定點 P(${MathUtils.fmt(px, 2)}, ${MathUtils.fmt(py, 2)}) 展開：</div>
+              <div id="m1-tex-2"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-sky-950/40 border border-sky-500/30">
+              <div class="text-xs text-sky-300 font-semibold mb-1">3. 化簡後直線一般式：</div>
+              <div id="m1-tex-3"></div>
+            </div>
+          `;
+
+          const xShift = MathUtils.shiftVar('x', h);
+          const yShift = MathUtils.shiftVar('y', k);
+          renderKaTeX(document.getElementById('m1-tex-1'), `(x_0 - h)${xShift} + (y_0 - k)${yShift} = r^2`);
+          renderKaTeX(
+            document.getElementById('m1-tex-2'),
+            `(${MathUtils.sub(px, h, 2)})${xShift} + (${MathUtils.sub(py, k, 2)})${yShift} = ${r}^2`
+          );
+          renderKaTeX(document.getElementById('m1-tex-3'), MathUtils.formatLine(A, B, C, 2));
+
+          document.getElementById('concept-notes').innerHTML = `
+            <p>• <strong>代數形式完全相同</strong>：無論點 $P(x_0, y_0)$ 在圓上、圓外或圓內，將二次項拆半 $x^2 \\to x_0 x$、一次項平均 $x \\to \\frac{x+x_0}{2}$ 後皆得到同一條直線。</p>
+            <p>• <strong>極線對偶性（高階拓展）</strong>：當 $P$ 在圓內時，任意通過 $P$ 的弦其兩端點切線交點必落在極線上；反之，過極線上任一點對圓作兩切線，其切點弦必通過定點 $P$。</p>
+          `;
+          renderInlineMath(document.getElementById('concept-notes'));
+        },
+      },
+
+      // --------------------------------------------------------------------------
+      // 模組二：過圓外一點求切線與「鉛直線陷阱」
+      // --------------------------------------------------------------------------
+      {
+        id: 2,
+        shortTitle: '02 切線鉛直線陷阱',
+        fullTitle: '過圓外一點求切線與「鉛直線陷阱」',
+        hint: '將點 P 拖曳至 x₀ = h ± r（右切點或左切點正上方），觸發二次項係數歸零陷阱！',
+        defaultState() {
+          return { h: 0, k: 0, r: 3, px: 5, py: 2 };
+        },
+        state: null,
+        init() {
+          this.state = this.defaultState();
+        },
+        reset() {
+          this.state = this.defaultState();
+        },
+        getDraggablePoints() {
+          return [{ id: 'P', x: this.state.px, y: this.state.py }];
+        },
+        onDragPoint(id, wx, wy) {
+          if (id === 'P') {
+            const { h, r } = this.state;
+            let nx = Math.round(wx * 10) / 10;
+            const ny = Math.round(wy * 10) / 10;
+            // Magnetic snap to vertical tangent lines x = h + r or x = h - r
+            if (Math.abs(nx - (h + r)) < 0.22) nx = h + r;
+            if (Math.abs(nx - (h - r)) < 0.22) nx = h - r;
+            this.state.px = nx;
+            this.state.py = ny;
+          }
+        },
+        renderControls(container, onUpdate) {
+          const s = this.state;
+          container.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">圓心 h</span>
+                  <span class="font-mono text-sky-300" id="m2-val-h">${s.h}</span>
+                </div>
+                <input type="range" id="m2-h" min="-3" max="3" step="0.5" value="${s.h}" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">圓心 k</span>
+                  <span class="font-mono text-sky-300" id="m2-val-k">${s.k}</span>
+                </div>
+                <input type="range" id="m2-k" min="-3" max="3" step="0.5" value="${s.k}" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-400">半徑 r</span>
+                  <span class="font-mono text-sky-300" id="m2-val-r">${s.r}</span>
+                </div>
+                <input type="range" id="m2-r" min="1.5" max="5" step="0.5" value="${s.r}" class="w-full" />
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button id="m2-trap-right" class="px-3 py-1.5 rounded-lg bg-rose-600/25 hover:bg-rose-600/40 text-rose-200 border border-rose-500/50 text-xs font-semibold transition">
+                ⚠️ 觸發鉛直線陷阱 (x₀ = h + r)
+              </button>
+              <button id="m2-trap-left" class="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/35 text-rose-200 border border-rose-500/40 text-xs font-semibold transition">
+                ⚠️ 左側鉛直陷阱 (x₀ = h - r)
+              </button>
+              <button id="m2-normal" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs transition">
+                一般圓外點 (5, 2)
+              </button>
+            </div>
+          `;
+
+          ['h', 'k', 'r'].forEach((key) => {
+            document.getElementById(`m2-${key}`).addEventListener('input', (e) => {
+              this.state[key] = parseFloat(e.target.value);
+              document.getElementById(`m2-val-${key}`).textContent = this.state[key];
+              onUpdate();
+            });
+          });
+
+          document.getElementById('m2-trap-right').addEventListener('click', () => {
+            this.state.px = this.state.h + this.state.r;
+            if (Math.abs(this.state.py - this.state.k) <= 0.5) {
+              this.state.py = this.state.k + this.state.r + 1;
+            }
+            onUpdate();
+          });
+
+          document.getElementById('m2-trap-left').addEventListener('click', () => {
+            this.state.px = this.state.h - this.state.r;
+            if (Math.abs(this.state.py - this.state.k) <= 0.5) {
+              this.state.py = this.state.k + this.state.r + 1;
+            }
+            onUpdate();
+          });
+
+          document.getElementById('m2-normal').addEventListener('click', () => {
+            this.state.px = this.state.h + this.state.r + 2;
+            this.state.py = this.state.k + 2;
+            onUpdate();
+          });
+        },
+        render(vp) {
+          const { h, k, r, px, py } = this.state;
+          vp.clear();
+          vp.drawGrid();
+
+          // Draw faint vertical guide lines x = h ± r so user can see where the trap zone is
+          vp.drawInfiniteLine(1, 0, -(h + r), { color: 'rgba(244, 63, 94, 0.22)', dashed: true, dashPattern: [4, 6], lineWidth: 1.2 });
+          vp.drawInfiniteLine(1, 0, -(h - r), { color: 'rgba(244, 63, 94, 0.22)', dashed: true, dashPattern: [4, 6], lineWidth: 1.2 });
+
+          vp.drawCircle(h, k, r, {
+            color: '#38bdf8',
+            fill: 'rgba(56, 189, 248, 0.06)',
+            lineWidth: 2.5,
+          });
+
+          const dist = MathUtils.dist(px, py, h, k);
+          const Am = MathUtils.clean((h - px) ** 2 - r * r, 1e-4);
+          const Bm = MathUtils.clean(-2 * (h - px) * (k - py), 1e-4);
+          const Cm = MathUtils.clean((k - py) ** 2 - r * r, 1e-4);
+
+          const legendEl = document.getElementById('canvas-legend');
+
+          if (dist > r + 1e-6) {
+            if (Am === 0) {
+              // Vertical tangent trap!
+              vp.drawInfiniteLine(1, 0, -px, {
+                color: '#f43f5e',
+                dashed: true,
+                dashPattern: [8, 5],
+                lineWidth: 3,
+                label: `漏解切線 x = ${MathUtils.fmt(px, 1)} (斜率不存在)`,
+              });
+
+              if (Math.abs(Bm) > 1e-6) {
+                const m1 = -Cm / Bm;
+                // Line: m1(x - px) - (y - py) = 0
+                vp.drawInfiniteLine(m1, -1, py - m1 * px, {
+                  color: '#34d399',
+                  lineWidth: 2.5,
+                  label: `一次式解出斜率 m = ${MathUtils.fmt(m1, 2)}`,
+                });
+              }
+
+              legendEl.innerHTML = `
+                <span class="px-2 py-0.5 rounded bg-rose-950/90 border border-rose-500/60 text-rose-200 font-semibold">┄┄ 紅色虛線：二次項歸零時容易漏掉的鉛直切線 x = ${MathUtils.fmt(px, 1)}</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-emerald-500/40 text-emerald-300">━━ 綠色實線：退化一次式唯一解出的斜切線</span>
+              `;
+            } else {
+              // Two valid finite slopes
+              const disc = Math.max(0, Bm * Bm - 4 * Am * Cm);
+              const m1 = (-Bm + Math.sqrt(disc)) / (2 * Am);
+              const m2 = (-Bm - Math.sqrt(disc)) / (2 * Am);
+              vp.drawInfiniteLine(m1, -1, py - m1 * px, { color: '#34d399', lineWidth: 2.4, label: `m₁ = ${MathUtils.fmt(m1, 2)}` });
+              vp.drawInfiniteLine(m2, -1, py - m2 * px, { color: '#fbbf24', lineWidth: 2.4, label: `m₂ = ${MathUtils.fmt(m2, 2)}` });
+
+              legendEl.innerHTML = `
+                <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-emerald-500/40 text-emerald-300">━━ 切線 1 (m₁ = ${MathUtils.fmt(m1, 2)})</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-amber-500/40 text-amber-300">━━ 切線 2 (m₂ = ${MathUtils.fmt(m2, 2)})</span>
+              `;
+            }
+          } else {
+            legendEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-slate-900/90 border border-slate-700 text-slate-300">請將點 P 拖曳至圓外以求解兩條切線斜率</span>`;
+          }
+
+          vp.drawPoint(h, k, { color: '#38bdf8', label: `C(${h}, ${k})`, offsetY: 16 });
+          vp.drawPoint(px, py, { color: '#f43f5e', haloColor: 'rgba(244, 63, 94, 0.28)', draggable: true, label: `P(${MathUtils.fmt(px, 1)}, ${MathUtils.fmt(py, 1)})` });
+        },
+        updateDashboard() {
+          const { h, k, r, px, py } = this.state;
+          const dist = MathUtils.dist(px, py, h, k);
+          const Am = MathUtils.clean((h - px) ** 2 - r * r, 1e-4);
+          const Bm = MathUtils.clean(-2 * (h - px) * (k - py), 1e-4);
+          const Cm = MathUtils.clean((k - py) ** 2 - r * r, 1e-4);
+
+          const statusPill = document.getElementById('status-pill');
+          const alertBanner = document.getElementById('alert-banner');
+
+          const isTrap = dist > r + 1e-6 && Am === 0;
+          if (isTrap) {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/25 text-rose-200 border border-rose-500/50 animate-pulse';
+            statusPill.textContent = '⚠️ 觸發鉛直線陷阱 (m² 係數 = 0)';
+            alertBanner.classList.remove('hidden');
+            alertBanner.innerHTML = `
+              <div class="font-bold text-rose-300 mb-0.5">⚠️ 二次項係數為 0！漏掉斜率不存在的鉛直切線</div>
+              <div>因為 $x_0 = ${MathUtils.fmt(px, 1)}$ 滿足 $(h - x_0)^2 - r^2 = 0$，點斜式假設 $y - y_0 = m(x - x_0)$ 無法表示鉛直線，導致方程式退化為一次式，<strong>必須手動補回 $x = ${MathUtils.fmt(px, 1)}$</strong>！</div>
+            `;
+            renderInlineMath(alertBanner);
+          } else if (dist > r + 1e-6) {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+            statusPill.textContent = '正常二次方程式（兩實根斜率）';
+            alertBanner.classList.add('hidden');
+          } else {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300';
+            statusPill.textContent = dist < r - 1e-6 ? 'P 在圓內（無實數切線）' : 'P 在圓上（僅一條切線）';
+            alertBanner.classList.add('hidden');
+          }
+
+          document.getElementById('metrics-grid').innerHTML = `
+            <div class="p-2.5 rounded-xl ${isTrap ? 'bg-rose-950/60 border-rose-500/60' : 'bg-slate-800/70 border-slate-700/70'} border">
+              <div class="text-xs ${isTrap ? 'text-rose-300 font-bold' : 'text-slate-400'}">m² 項係數 [(h-x₀)² - r²]</div>
+              <div class="text-base font-mono font-bold ${isTrap ? 'text-rose-300' : 'text-white'} mt-0.5">${MathUtils.fmt(Am, 2)} ${isTrap ? '← 歸零！' : ''}</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">m 項係數 / 常數項</div>
+              <div class="text-sm font-mono font-bold text-sky-300 mt-0.5">B = ${MathUtils.fmt(Bm, 2)}, C = ${MathUtils.fmt(Cm, 2)}</div>
+            </div>
+          `;
+
+          // Quadratic equation string
+          let quadStr = '';
+          quadStr += MathUtils.term(Am, 'm^2', true, 2);
+          quadStr += MathUtils.term(Bm, 'm', quadStr === '', 2);
+          quadStr += MathUtils.term(Cm, '', quadStr === '', 2);
+          quadStr = (quadStr || '0') + ' = 0';
+
+          let rootTex = '';
+          if (dist > r + 1e-6) {
+            if (Am === 0) {
+              const m1 = Math.abs(Bm) > 1e-6 ? -Cm / Bm : 0;
+              rootTex = `\\text{退化一次式解：} m_1 = ${MathUtils.fmt(m1, 3)} \\quad ; \\quad \\color{#fb7185}{\\text{補回鉛直線 } x = ${MathUtils.fmt(px, 1)}}`;
+            } else {
+              const disc = Math.max(0, Bm * Bm - 4 * Am * Cm);
+              const m1 = (-Bm + Math.sqrt(disc)) / (2 * Am);
+              const m2 = (-Bm - Math.sqrt(disc)) / (2 * Am);
+              rootTex = `m_1 = ${MathUtils.fmt(m1, 3)} \\quad , \\quad m_2 = ${MathUtils.fmt(m2, 3)}`;
+            }
+          } else {
+            rootTex = `\\Delta_m = ${MathUtils.fmt(Bm * Bm - 4 * Am * Cm, 2)} \\le 0 \\text{（無兩相異斜率解）}`;
+          }
+
+          document.getElementById('math-derivation').innerHTML = `
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div class="text-xs text-slate-400 mb-1">1. 圓心到切線距離 d(C, L) = r 整理式：</div>
+              <div id="m2-tex-1"></div>
+            </div>
+            <div class="p-3 rounded-xl ${isTrap ? 'bg-rose-950/40 border-rose-500/50' : 'bg-slate-950/80 border-slate-800'} border">
+              <div class="text-xs ${isTrap ? 'text-rose-300 font-semibold' : 'text-slate-400'} mb-1">2. 關於斜率 m 的方程式：</div>
+              <div id="m2-tex-2"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-sky-950/40 border border-sky-500/30">
+              <div class="text-xs text-sky-300 font-semibold mb-1">3. 切線斜率與方程式結論：</div>
+              <div id="m2-tex-3"></div>
+            </div>
+          `;
+
+          renderKaTeX(document.getElementById('m2-tex-1'), `\\left[(h - x_0)^2 - r^2\\right]m^2 - 2(h - x_0)(k - y_0)m + \\left[(k - y_0)^2 - r^2\\right] = 0`);
+          renderKaTeX(document.getElementById('m2-tex-2'), quadStr);
+          renderKaTeX(document.getElementById('m2-tex-3'), rootTex);
+
+          document.getElementById('concept-notes').innerHTML = `
+            <p>• <strong>為何會漏解？</strong> 設過 $P(x_0, y_0)$ 的直線為 $y - y_0 = m(x - x_0)$ 時，已預設「斜率 $m$ 存在」，因此先天排除了鉛直線 $x = x_0$。</p>
+            <p>• <strong>秒殺檢驗法</strong>：過圓外一點作切線<strong>必定有兩條</strong>！若用點斜式解出的 $m$ 只有一個值（代表 $m^2$ 係數為 $0$），不需重算，直接補上 $x = x_0$ 即為第二條切線。</p>
+          `;
+          renderInlineMath(document.getElementById('concept-notes'));
+        },
+      },
+
+      // --------------------------------------------------------------------------
+      // 模組三：圓系方程式與根軸（Radical Axis）
+      // --------------------------------------------------------------------------
+      {
+        id: 3,
+        shortTitle: '03 圓系與根軸',
+        fullTitle: '圓系方程式 C₁ + kC₂ = 0 與根軸（Radical Axis）',
+        hint: '調整 k 值觀察圓系動態變化；設為 k = -1 即可消去二次項得到根軸，並可拖曳根軸動點 P 驗證等切線長！',
+        defaultState() {
+          return {
+            h1: -2, k1: 0, r1: 3,
+            h2: 2.5, k2: 0.5, r2: 2.5,
+            k: 0.5,
+            tP: 2.2, // parameter along radical axis
+          };
+        },
+        state: null,
+        init() {
+          this.state = this.defaultState();
+        },
+        reset() {
+          this.state = this.defaultState();
+        },
+        getRadicalAxis() {
+          const { h1, k1, r1, h2, k2, r2 } = this.state;
+          const d1 = -2 * h1, e1 = -2 * k1, f1 = h1 * h1 + k1 * k1 - r1 * r1;
+          const d2 = -2 * h2, e2 = -2 * k2, f2 = h2 * h2 + k2 * k2 - r2 * r2;
+          return {
+            A: d1 - d2,
+            B: e1 - e2,
+            C: f1 - f2,
+            d1, e1, f1, d2, e2, f2,
+          };
+        },
+        getPointPOnAxis() {
+          const { A, B, C } = this.getRadicalAxis();
+          const norm = Math.hypot(A, B);
+          if (norm < 1e-6) return { x: 0, y: 0 };
+          // Base point on axis closest to origin
+          const x0 = (-A * C) / (norm * norm);
+          const y0 = (-B * C) / (norm * norm);
+          const ux = -B / norm;
+          const uy = A / norm;
+          return {
+            x: x0 + this.state.tP * ux,
+            y: y0 + this.state.tP * uy,
+          };
+        },
+        getDraggablePoints() {
+          const pts = [
+            { id: 'O1', x: this.state.h1, y: this.state.k1 },
+            { id: 'O2', x: this.state.h2, y: this.state.k2 },
+          ];
+          if (Math.abs(this.state.k + 1) < 1e-4) {
+            const p = this.getPointPOnAxis();
+            pts.push({ id: 'P', x: p.x, y: p.y });
+          }
+          return pts;
+        },
+        onDragPoint(id, wx, wy) {
+          if (id === 'O1') {
+            this.state.h1 = Math.round(wx * 10) / 10;
+            this.state.k1 = Math.round(wy * 10) / 10;
+          } else if (id === 'O2') {
+            this.state.h2 = Math.round(wx * 10) / 10;
+            this.state.k2 = Math.round(wy * 10) / 10;
+          } else if (id === 'P') {
+            const { A, B, C } = this.getRadicalAxis();
+            const norm = Math.hypot(A, B);
+            if (norm > 1e-6) {
+              const x0 = (-A * C) / (norm * norm);
+              const y0 = (-B * C) / (norm * norm);
+              const ux = -B / norm;
+              const uy = A / norm;
+              this.state.tP = Math.max(-7, Math.min(7, (wx - x0) * ux + (wy - y0) * uy));
+            }
+          }
+        },
+        renderControls(container, onUpdate) {
+          const s = this.state;
+          container.innerHTML = `
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-semibold text-amber-300">圓系參數 k ∈ [-5, 5]</span>
+                <span class="font-mono font-bold text-amber-300 text-sm" id="m3-val-k">${s.k.toFixed(2)}</span>
+              </div>
+              <input type="range" id="m3-k" min="-5" max="5" step="0.05" value="${s.k}" class="w-full" />
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button id="m3-set-rad" class="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/45 text-emerald-200 border border-emerald-500/50 text-xs font-semibold transition">
+                  🎯 設為 k = -1（根軸）
+                </button>
+                <button id="m3-preset-inter" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs transition">
+                  兩圓相交
+                </button>
+                <button id="m3-preset-disjoint" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs transition">
+                  兩圓外離（驗證等切線長）
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-sky-300">圓 C₁ 半徑 r₁</span>
+                  <span class="font-mono text-sky-300" id="m3-val-r1">${s.r1}</span>
+                </div>
+                <input type="range" id="m3-r1" min="1" max="4.5" step="0.5" value="${s.r1}" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-indigo-300">圓 C₂ 半徑 r₂</span>
+                  <span class="font-mono text-indigo-300" id="m3-val-r2">${s.r2}</span>
+                </div>
+                <input type="range" id="m3-r2" min="1" max="4.5" step="0.5" value="${s.r2}" class="w-full" />
+              </div>
+            </div>
+          `;
+
+          const kSlider = document.getElementById('m3-k');
+          const syncAll = () => {
+            syncInput('m3-k', this.state.k, 'm3-val-k', this.state.k.toFixed(2));
+            syncInput('m3-r1', this.state.r1, 'm3-val-r1');
+            syncInput('m3-r2', this.state.r2, 'm3-val-r2');
+          };
+          kSlider.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            if (Math.abs(val + 1) < 0.08) {
+              val = -1;
+              kSlider.value = -1;
+            }
+            this.state.k = val;
+            document.getElementById('m3-val-k').textContent = val.toFixed(2);
+            onUpdate();
+          });
+
+          ['r1', 'r2'].forEach((key) => {
+            document.getElementById(`m3-${key}`).addEventListener('input', (e) => {
+              this.state[key] = parseFloat(e.target.value);
+              document.getElementById(`m3-val-${key}`).textContent = this.state[key];
+              onUpdate();
+            });
+          });
+
+          document.getElementById('m3-set-rad').addEventListener('click', () => {
+            this.state.k = -1;
+            kSlider.value = -1;
+            document.getElementById('m3-val-k').textContent = '-1.00';
+            onUpdate();
+          });
+
+          document.getElementById('m3-preset-inter').addEventListener('click', () => {
+            this.state.h1 = -2; this.state.k1 = 0; this.state.r1 = 3;
+            this.state.h2 = 2; this.state.k2 = 0; this.state.r2 = 2.5;
+            this.state.k = 0.6;
+            syncAll();
+            onUpdate();
+          });
+
+          document.getElementById('m3-preset-disjoint').addEventListener('click', () => {
+            this.state.h1 = -3; this.state.k1 = 0; this.state.r1 = 2;
+            this.state.h2 = 3; this.state.k2 = 0; this.state.r2 = 2.5;
+            this.state.k = -1;
+            this.state.tP = 2.5;
+            syncAll();
+            onUpdate();
+          });
+        },
+        render(vp) {
+          const { h1, k1, r1, h2, k2, r2, k } = this.state;
+          vp.clear();
+          vp.drawGrid();
+
+          // Draw C1 and C2
+          vp.drawCircle(h1, k1, r1, { color: '#38bdf8', fill: 'rgba(56, 189, 248, 0.05)', lineWidth: 2.2 });
+          vp.drawCircle(h2, k2, r2, { color: '#818cf8', fill: 'rgba(129, 140, 248, 0.05)', lineWidth: 2.2 });
+
+          const rad = this.getRadicalAxis();
+          const legendEl = document.getElementById('canvas-legend');
+
+          if (Math.abs(k + 1) < 1e-4) {
+            // k = -1 -> Radical Axis
+            vp.drawInfiniteLine(rad.A, rad.B, rad.C, {
+              color: '#34d399',
+              lineWidth: 2.8,
+              label: '根軸 (k = -1)',
+            });
+
+            // Movable point P on radical axis -> equal tangent lengths
+            const P = this.getPointPOnAxis();
+            const d1 = MathUtils.dist(P.x, P.y, h1, k1);
+            const d2 = MathUtils.dist(P.x, P.y, h2, k2);
+            if (d1 > r1 + 0.05 && d2 > r2 + 0.05) {
+              const ang1 = Math.atan2(P.y - k1, P.x - h1);
+              const beta1 = Math.acos(r1 / d1);
+              const t1 = { x: h1 + r1 * Math.cos(ang1 + beta1), y: k1 + r1 * Math.sin(ang1 + beta1) };
+
+              const ang2 = Math.atan2(P.y - k2, P.x - h2);
+              const beta2 = Math.acos(r2 / d2);
+              const t2 = { x: h2 + r2 * Math.cos(ang2 - beta2), y: k2 + r2 * Math.sin(ang2 - beta2) };
+
+              const L1 = Math.sqrt(d1 * d1 - r1 * r1);
+              const L2 = Math.sqrt(d2 * d2 - r2 * r2);
+
+              vp.drawSegment(P.x, P.y, t1.x, t1.y, { color: '#fbbf24', dashed: true, lineWidth: 2, label: `L₁=${MathUtils.fmt(L1, 2)}` });
+              vp.drawSegment(P.x, P.y, t2.x, t2.y, { color: '#f472b6', dashed: true, lineWidth: 2, label: `L₂=${MathUtils.fmt(L2, 2)}` });
+              vp.drawPoint(t1.x, t1.y, { color: '#fbbf24', radius: 4 });
+              vp.drawPoint(t2.x, t2.y, { color: '#f472b6', radius: 4 });
+            }
+
+            vp.drawPoint(P.x, P.y, {
+              color: '#34d399',
+              haloColor: 'rgba(52, 211, 153, 0.28)',
+              draggable: true,
+              label: `根軸動點 P(${MathUtils.fmt(P.x, 1)}, ${MathUtils.fmt(P.y, 1)})`,
+            });
+
+            legendEl.innerHTML = `
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-emerald-500/40 text-emerald-300">━━ 綠色實線：根軸（k = -1 時曲率歸零為直線，且恆垂直於連心線 O₁O₂）</span>
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-amber-500/40 text-amber-300">● 拖曳點 P 驗證兩切線段長 L₁ = L₂</span>
+            `;
+          } else {
+            // Family Circle C1 + k C2 = 0
+            // 根軸（k = -1）一律畫出，方便對照圓系
+            if (Math.hypot(rad.A, rad.B) > 1e-6) {
+              vp.drawInfiniteLine(rad.A, rad.B, rad.C, { color: '#34d399', lineWidth: 2.2, label: '根軸 (k = -1)' });
+            }
+            const denom = 1 + k;
+            const hk = -(rad.d1 + k * rad.d2) / (2 * denom);
+            const kk = -(rad.e1 + k * rad.e2) / (2 * denom);
+            const fk = (rad.f1 + k * rad.f2) / denom;
+            const rk2 = hk * hk + kk * kk - fk;
+
+            if (rk2 > 0) {
+              const rk = Math.sqrt(rk2);
+              vp.drawCircle(hk, kk, rk, {
+                color: '#fbbf24',
+                fill: 'rgba(251, 191, 36, 0.08)',
+                lineWidth: 2.6,
+              });
+              vp.drawPoint(hk, kk, { color: '#fbbf24', radius: 4, label: `圓系圓心` });
+            }
+
+            legendEl.innerHTML = `
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-sky-500/40 text-sky-300">━━ 藍圓 C₁</span>
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-indigo-500/40 text-indigo-300">━━ 靛圓 C₂</span>
+              <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-amber-500/40 text-amber-300">━━ 黃圓：圓系 C₁ + (${k.toFixed(2)})C₂ = 0</span>
+            `;
+          }
+
+          vp.drawPoint(h1, k1, { color: '#38bdf8', draggable: true, label: 'O₁', offsetY: 16 });
+          vp.drawPoint(h2, k2, { color: '#818cf8', draggable: true, label: 'O₂', offsetY: 16 });
+        },
+        updateDashboard() {
+          const { h1, k1, r1, h2, k2, r2, k } = this.state;
+          const rad = this.getRadicalAxis();
+          const isRad = Math.abs(k + 1) < 1e-4;
+
+          const statusPill = document.getElementById('status-pill');
+          const alertBanner = document.getElementById('alert-banner');
+          alertBanner.classList.add('hidden');
+          if (Math.hypot(rad.A, rad.B) < 1e-6) {
+            alertBanner.classList.remove('hidden');
+            alertBanner.textContent = '⚠️ 兩圓同心：C₁ − C₂ 的 x、y 項全部消去，只剩常數，不存在根軸。';
+          }
+
+          let rk2 = 0;
+          if (!isRad) {
+            const denom = 1 + k;
+            const hk = -(rad.d1 + k * rad.d2) / (2 * denom);
+            const kk = -(rad.e1 + k * rad.e2) / (2 * denom);
+            const fk = (rad.f1 + k * rad.f2) / denom;
+            rk2 = hk * hk + kk * kk - fk;
+          }
+
+          if (isRad) {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+            statusPill.textContent = 'k = -1 → 退化為根軸直線';
+          } else if (rk2 > 0) {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+            statusPill.textContent = `圓系實圓 (r_k = ${MathUtils.fmt(Math.sqrt(rk2), 2)})`;
+          } else {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+            statusPill.textContent = '此 k 值無實數圓形 (r_k² ≤ 0)';
+          }
+
+          const P = this.getPointPOnAxis();
+          const d1 = MathUtils.dist(P.x, P.y, h1, k1);
+          const d2 = MathUtils.dist(P.x, P.y, h2, k2);
+          const hasTan = isRad && d1 > r1 + 0.05 && d2 > r2 + 0.05;
+
+          document.getElementById('metrics-grid').innerHTML = `
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">當前圓系參數 k</div>
+              <div class="text-base font-mono font-bold text-amber-300 mt-0.5">k = ${k.toFixed(2)}</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">${hasTan ? '根軸動點 P 到兩圓切線長' : '兩圓連心線長 d(O₁, O₂)'}</div>
+              <div class="text-sm font-mono font-bold text-emerald-300 mt-0.5">${
+                hasTan
+                  ? `L₁ = L₂ = ${MathUtils.fmt(Math.sqrt(d1 * d1 - r1 * r1), 2)}`
+                  : MathUtils.fmt(MathUtils.dist(h1, k1, h2, k2), 2)
+              }</div>
+            </div>
+          `;
+
+          document.getElementById('math-derivation').innerHTML = `
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div class="text-xs text-slate-400 mb-1">1. 兩圓一般式 C₁ 與 C₂：</div>
+              <div id="m3-tex-1"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-emerald-950/35 border border-emerald-500/30">
+              <div class="text-xs text-emerald-300 font-semibold mb-1">2. 根軸方程式 (k = -1, 即 C₁ - C₂ = 0)：</div>
+              <div id="m3-tex-2"></div>
+            </div>
+          `;
+
+          renderKaTeX(
+            document.getElementById('m3-tex-1'),
+            `\\begin{aligned} C_1 &: ${MathUtils.formatCircleGeneral(rad.d1, rad.e1, rad.f1, 1)} \\\\ C_2 &: ${MathUtils.formatCircleGeneral(rad.d2, rad.e2, rad.f2, 1)} \\end{aligned}`
+          );
+          renderKaTeX(document.getElementById('m3-tex-2'), MathUtils.formatLine(rad.A, rad.B, rad.C, 1));
+
+          document.getElementById('concept-notes').innerHTML = `
+            <p>• <strong>圓系缺憾原則</strong>：$C_1 + kC_2 = 0$ 可表示所有過兩圓交點的圓，但<strong>唯獨無法表示 $C_2$ 本身</strong>（因為 $k$ 無論多大都無法把 $C_1$ 係數消為 $0$）。</p>
+            <p>• <strong>根軸（等切線長軌跡）</strong>：當 $k = -1$ 時消去 $x^2 + y^2$，無論兩圓是否相交，所得直線上的任一點（在圓外時）對兩圓所作<strong>切線段長必相等</strong>。</p>
+          `;
+          renderInlineMath(document.getElementById('concept-notes'));
+        },
+      },
+
+      // --------------------------------------------------------------------------
+      // 模組四：兩圓位置關係與內、外公切線段長
+      // --------------------------------------------------------------------------
+      {
+        id: 4,
+        shortTitle: '04 兩圓公切線',
+        fullTitle: '兩圓位置關係與內、外公切線段長',
+        hint: '拖曳兩圓心 O₁, O₂ 改變連心線距離 d，並開啟輔助直角三角形觀察畢氏定理構造！',
+        defaultState() {
+          return {
+            h1: -3, k1: 0, r1: 2.5,
+            h2: 3.5, k2: 0.5, r2: 1.5,
+            showHelper: false,
+            showRadical: true,
+          };
+        },
+        state: null,
+        init() {
+          this.state = this.defaultState();
+        },
+        reset() {
+          this.state = this.defaultState();
+        },
+        getDraggablePoints() {
+          return [
+            { id: 'O1', x: this.state.h1, y: this.state.k1 },
+            { id: 'O2', x: this.state.h2, y: this.state.k2 },
+          ];
+        },
+        onDragPoint(id, wx, wy) {
+          const rx = Math.round(wx * 10) / 10;
+          const ry = Math.round(wy * 10) / 10;
+          if (id === 'O1') {
+            this.state.h1 = rx;
+            this.state.k1 = ry;
+          } else if (id === 'O2') {
+            this.state.h2 = rx;
+            this.state.k2 = ry;
+          }
+        },
+        renderControls(container, onUpdate) {
+          const s = this.state;
+          container.innerHTML = `
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-sky-300">大圓/左圓半徑 r₁</span>
+                  <span class="font-mono text-sky-300" id="m4-val-r1">${s.r1}</span>
+                </div>
+                <input type="range" id="m4-r1" min="1" max="4.5" step="0.5" value="${s.r1}" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-indigo-300">右圓半徑 r₂</span>
+                  <span class="font-mono text-indigo-300" id="m4-val-r2">${s.r2}</span>
+                </div>
+                <input type="range" id="m4-r2" min="0.5" max="4" step="0.5" value="${s.r2}" class="w-full" />
+              </div>
+            </div>
+
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 cursor-pointer select-none">
+              <input type="checkbox" id="m4-helper" ${s.showHelper ? 'checked' : ''} class="w-4 h-4 accent-sky-400 rounded" />
+              <span class="text-xs sm:text-sm font-medium text-slate-200">顯示平移半徑後的「輔助直角三角形」</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 cursor-pointer select-none">
+              <input type="checkbox" id="m4-radical" ${s.showRadical ? 'checked' : ''} class="w-4 h-4 accent-purple-400 rounded" />
+              <span class="text-xs sm:text-sm font-medium text-slate-200">顯示根軸（兩圓方程式相減所得直線）</span>
+            </label>
+
+            <div class="flex flex-wrap gap-1.5">
+              <button data-preset="disjoint" class="m4-preset px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700">外離 (4條)</button>
+              <button data-preset="ext-tan" class="m4-preset px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700">外切 (3條)</button>
+              <button data-preset="intersect" class="m4-preset px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700">相交 (2條)</button>
+              <button data-preset="int-tan" class="m4-preset px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700">內切 (1條)</button>
+              <button data-preset="inside" class="m4-preset px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700">內含 (0條)</button>
+            </div>
+          `;
+
+          ['r1', 'r2'].forEach((key) => {
+            document.getElementById(`m4-${key}`).addEventListener('input', (e) => {
+              this.state[key] = parseFloat(e.target.value);
+              document.getElementById(`m4-val-${key}`).textContent = this.state[key];
+              onUpdate();
+            });
+          });
+
+          document.getElementById('m4-helper').addEventListener('change', (e) => {
+            this.state.showHelper = e.target.checked;
+            onUpdate();
+          });
+          document.getElementById('m4-radical').addEventListener('change', (e) => {
+            this.state.showRadical = e.target.checked;
+            onUpdate();
+          });
+
+          document.querySelectorAll('.m4-preset').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const p = btn.dataset.preset;
+              // r₁ = r₂ 時不可能內切 / 內含，自動把 r₂ 調小 1
+              if ((p === 'int-tan' || p === 'inside') && Math.abs(this.state.r1 - this.state.r2) < 1e-9) {
+                this.state.r2 = Math.max(0.5, this.state.r1 - 1);
+                syncInput('m4-r2', this.state.r2, 'm4-val-r2');
+              }
+              const { r1, r2 } = this.state;
+              this.state.k1 = 0;
+              this.state.k2 = 0;
+              let targetD = r1 + r2 + 2;
+              if (p === 'ext-tan') targetD = r1 + r2;
+              else if (p === 'intersect') targetD = (r1 + r2 + Math.abs(r1 - r2)) / 2;
+              else if (p === 'int-tan') targetD = Math.abs(r1 - r2) || 0.5;
+              else if (p === 'inside') targetD = Math.max(0.4, Math.abs(r1 - r2) * 0.45);
+              this.state.h1 = -targetD / 2;
+              this.state.h2 = targetD / 2;
+              onUpdate();
+            });
+          });
+        },
+        // 回傳所有公切線：{ type, len, m（鉛直時為 null）, eq }
+        // 根軸 Ax + By + C = 0（兩圓同心時不存在）
+        getRadical() {
+          const { h1, k1, r1, h2, k2, r2 } = this.state;
+          const A = -2 * (h1 - h2), B = -2 * (k1 - k2);
+          if (Math.hypot(A, B) < 1e-6) return null;
+          return { A, B, C: h1 * h1 + k1 * k1 - r1 * r1 - (h2 * h2 + k2 * k2 - r2 * r2) };
+        },
+        getTangents() {
+          const { h1, k1, r1, h2, k2, r2 } = this.state;
+          const d = MathUtils.dist(h1, k1, h2, k2);
+          if (d < 1e-3) return [];
+          const ux = (h2 - h1) / d, uy = (k2 - k1) / d, nx = -uy, ny = ux;
+          const list = [];
+          const add = (type, vx, vy, c, len) => {
+            const m = Math.abs(vy) < 1e-6 ? null : -vx / vy;
+            const eq = m === null ? `x = ${MathUtils.fmt(c / vx, 2)}` : `y = ${MathUtils.fmt(m, 2)}x ${c / vy < 0 ? '-' : '+'} ${MathUtils.fmt(Math.abs(c / vy), 2)}`;
+            list.push({ type, len, m, eq });
+          };
+          if (d >= Math.abs(r1 - r2) - 1e-3) {
+            const cosA = Math.max(-1, Math.min(1, (r1 - r2) / d));
+            const sinA = Math.sqrt(Math.max(0, 1 - cosA * cosA));
+            const len = Math.sqrt(Math.max(0, d * d - (r1 - r2) ** 2));
+            [1, -1].forEach((s, i) => {
+              if (sinA < 0.03 && i === 1) return;
+              const vx = cosA * ux + s * sinA * nx, vy = cosA * uy + s * sinA * ny;
+              add('外', vx, vy, vx * (h1 + r1 * vx) + vy * (k1 + r1 * vy), len);
+            });
+          }
+          if (d >= r1 + r2 - 1e-3) {
+            const cosB = Math.max(-1, Math.min(1, (r1 + r2) / d));
+            const sinB = Math.sqrt(Math.max(0, 1 - cosB * cosB));
+            const len = Math.sqrt(Math.max(0, d * d - (r1 + r2) ** 2));
+            [1, -1].forEach((s, i) => {
+              if (sinB < 0.03 && i === 1) return;
+              const wx = cosB * ux + s * sinB * nx, wy = cosB * uy + s * sinB * ny;
+              add('內', wx, wy, wx * (h1 + r1 * wx) + wy * (k1 + r1 * wy), len);
+            });
+          }
+          return list;
+        },
+        render(vp) {
+          const { h1, k1, r1, h2, k2, r2, showHelper, showRadical } = this.state;
+          vp.clear();
+          vp.drawGrid();
+
+          vp.drawCircle(h1, k1, r1, { color: '#38bdf8', fill: 'rgba(56, 189, 248, 0.06)', lineWidth: 2.4 });
+          vp.drawCircle(h2, k2, r2, { color: '#818cf8', fill: 'rgba(129, 140, 248, 0.06)', lineWidth: 2.4 });
+
+          // 根軸：C₁ − C₂ = 0，恆垂直於連心線
+          if (showRadical) {
+            const ra = this.getRadical();
+            if (ra) vp.drawInfiniteLine(ra.A, ra.B, ra.C, { color: '#c084fc', lineWidth: 2.2, label: '根軸' });
+          }
+
+          // Line of centers O1O2
+          const d = MathUtils.dist(h1, k1, h2, k2);
+          vp.drawSegment(h1, k1, h2, k2, { color: 'rgba(148, 163, 184, 0.5)', lineWidth: 1.2, label: `d = ${MathUtils.fmt(d, 2)}`, labelOffsetY: 14 });
+
+          if (d > 1e-4) {
+            const ux = (h2 - h1) / d;
+            const uy = (k2 - k1) / d;
+            const nx = -uy;
+            const ny = ux;
+
+            // 1. External Common Tangents (exist when d >= |r1 - r2|)
+            if (d >= Math.abs(r1 - r2) - 1e-3) {
+              const cosA = Math.max(-1, Math.min(1, (r1 - r2) / d));
+              const sinA = Math.sqrt(Math.max(0, 1 - cosA * cosA));
+              [1, -1].forEach((sign, idx) => {
+                if (sinA < 0.03 && idx === 1) return; // single tangent when internal tangent
+                const vx = cosA * ux + sign * sinA * nx;
+                const vy = cosA * uy + sign * sinA * ny;
+                const t1x = h1 + r1 * vx, t1y = k1 + r1 * vy;
+                const t2x = h2 + r2 * vx, t2y = k2 + r2 * vy;
+                // Highlight segment T1T2
+                vp.drawSegment(t1x, t1y, t2x, t2y, { color: '#34d399', lineWidth: 2.8, label: `外${idx + 1}｜L=${MathUtils.fmt(Math.sqrt(Math.max(0, d * d - (r1 - r2) ** 2)), 2)}｜${Math.abs(vy) < 1e-6 ? 'x=定值' : 'm=' + MathUtils.fmt(-vx / vy, 2)}`, labelOffsetY: idx === 0 ? -10 : 18 });
+                vp.drawPoint(t1x, t1y, { color: '#34d399', radius: 3.8 });
+                vp.drawPoint(t2x, t2y, { color: '#34d399', radius: 3.8 });
+
+                // Helper Right Triangle on upper tangent (sign === 1)
+                if (showHelper && idx === 0 && sinA > 1e-3) {
+                  if (r1 >= r2) {
+                    const hx = h1 + (r1 - r2) * vx;
+                    const hy = k1 + (r1 - r2) * vy;
+                    vp.drawSegment(h2, k2, hx, hy, { color: '#34d399', lineWidth: 2, label: `外公切=${MathUtils.fmt(Math.sqrt(Math.max(0, d * d - (r1 - r2) ** 2)), 2)}`, labelOffsetY: -12 });
+                    vp.drawSegment(h1, k1, hx, hy, { color: '#38bdf8', lineWidth: 2, label: `|r₁-r₂|=${MathUtils.fmt(Math.abs(r1 - r2), 1)}`, labelOffsetX: -48 });
+                    vp.drawRightAngle(hx, hy, h1, k1, h2, k2, 10, '#34d399');
+                  } else {
+                    const hx = h2 + (r2 - r1) * vx;
+                    const hy = k2 + (r2 - r1) * vy;
+                    vp.drawSegment(h1, k1, hx, hy, { color: '#34d399', lineWidth: 2 });
+                    vp.drawSegment(h2, k2, hx, hy, { color: '#818cf8', lineWidth: 2 });
+                    vp.drawRightAngle(hx, hy, h2, k2, h1, k1, 10, '#34d399');
+                  }
+                }
+              });
+            }
+
+            // 2. Internal Common Tangents (exist when d >= r1 + r2)
+            if (d >= r1 + r2 - 1e-3) {
+              const cosB = Math.max(-1, Math.min(1, (r1 + r2) / d));
+              const sinB = Math.sqrt(Math.max(0, 1 - cosB * cosB));
+              [1, -1].forEach((sign, idx) => {
+                if (sinB < 0.03 && idx === 1) return;
+                const wx = cosB * ux + sign * sinB * nx;
+                const wy = cosB * uy + sign * sinB * ny;
+                const s1x = h1 + r1 * wx, s1y = k1 + r1 * wy;
+                const s2x = h2 - r2 * wx, s2y = k2 - r2 * wy;
+                vp.drawSegment(s1x, s1y, s2x, s2y, { color: '#fbbf24', lineWidth: 2.8, label: `內${idx + 1}｜L=${MathUtils.fmt(Math.sqrt(Math.max(0, d * d - (r1 + r2) ** 2)), 2)}｜${Math.abs(wy) < 1e-6 ? 'x=定值' : 'm=' + MathUtils.fmt(-wx / wy, 2)}`, labelOffsetY: idx === 0 ? -10 : 18 });
+                vp.drawPoint(s1x, s1y, { color: '#fbbf24', radius: 3.8 });
+                vp.drawPoint(s2x, s2y, { color: '#fbbf24', radius: 3.8 });
+
+                // Helper Right Triangle on first internal tangent (sign === 1)
+                if (showHelper && idx === 0 && sinB > 1e-3) {
+                  const hx = h1 + (r1 + r2) * wx;
+                  const hy = k1 + (r1 + r2) * wy;
+                  vp.drawSegment(s1x, s1y, hx, hy, { color: '#fbbf24', lineWidth: 1.8 });
+                  vp.drawSegment(h2, k2, hx, hy, { color: '#fbbf24', lineWidth: 2, label: `內公切=${MathUtils.fmt(Math.sqrt(Math.max(0, d * d - (r1 + r2) ** 2)), 2)}`, labelOffsetY: 16 });
+                  vp.drawRightAngle(hx, hy, h1, k1, h2, k2, 10, '#fbbf24');
+                }
+              });
+            }
+          }
+
+          vp.drawPoint(h1, k1, { color: '#38bdf8', draggable: true, label: 'O₁', offsetY: 16 });
+          vp.drawPoint(h2, k2, { color: '#818cf8', draggable: true, label: 'O₂', offsetY: 16 });
+
+          document.getElementById('canvas-legend').innerHTML = `
+            <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-emerald-500/40 text-emerald-300">━━ 綠色線段：外公切線段長</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-amber-500/40 text-amber-300">━━ 黃色線段：內公切線段長</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-purple-500/40 text-purple-300">━━ 紫色直線：根軸</span>
+          `;
+        },
+        updateDashboard() {
+          const { h1, k1, r1, h2, k2, r2 } = this.state;
+          const d = MathUtils.dist(h1, k1, h2, k2);
+          const sumR = r1 + r2;
+          const diffR = Math.abs(r1 - r2);
+
+          let relation = '';
+          let tanCount = '';
+          if (d < 1e-3 && diffR < 1e-3) {
+            relation = '兩圓重合 (同心且 r₁ = r₂)';
+            tanCount = '無限多條（重合）';
+          } else if (d > sumR + 1e-3) {
+            relation = '兩圓外離 (d > r₁ + r₂)';
+            tanCount = '4 條（2 外 2 內）';
+          } else if (Math.abs(d - sumR) <= 1e-3) {
+            relation = '兩圓外切 (d = r₁ + r₂)';
+            tanCount = '3 條（2 外 1 內）';
+          } else if (d > diffR + 1e-3) {
+            relation = '相交於兩點 (|r₁ - r₂| < d < r₁ + r₂)';
+            tanCount = '2 條（2 外 0 內）';
+          } else if (Math.abs(d - diffR) <= 1e-3 && d > 0.02) {
+            relation = '兩圓內切 (d = |r₁ - r₂|)';
+            tanCount = '1 條（1 外 0 內）';
+          } else {
+            relation = '兩圓內含 (d < |r₁ - r₂|)';
+            tanCount = '0 條公切線';
+          }
+
+          const statusPill = document.getElementById('status-pill');
+          statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/40';
+          statusPill.textContent = relation;
+          document.getElementById('alert-banner').classList.add('hidden');
+
+          const extLen = d >= diffR - 1e-4 ? MathUtils.fmt(Math.sqrt(Math.max(0, d * d - diffR * diffR)), 2) : '不存在';
+          const intLen = d >= sumR - 1e-4 ? MathUtils.fmt(Math.sqrt(Math.max(0, d * d - sumR * sumR)), 2) : '不存在';
+
+          document.getElementById('metrics-grid').innerHTML = `
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">連心線長 d / 公切線數</div>
+              <div class="text-sm font-mono font-bold text-white mt-0.5">d = ${MathUtils.fmt(d, 2)}（${tanCount}）</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">半徑和與半徑差</div>
+              <div class="text-sm font-mono font-bold text-sky-300 mt-0.5">r₁+r₂ = ${sumR}, |r₁-r₂| = ${diffR}</div>
+            </div>
+          `;
+
+          document.getElementById('math-derivation').innerHTML = `
+            <div class="p-3 rounded-xl bg-emerald-950/35 border border-emerald-500/30">
+              <div class="text-xs text-emerald-300 font-semibold mb-1">1. 外公切線段長公式（平移半徑形成股長 |r₁ - r₂|）：</div>
+              <div id="m4-tex-1"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-amber-950/35 border border-amber-500/30">
+              <div class="text-xs text-amber-300 font-semibold mb-1">2. 內公切線段長公式（延伸半徑形成股長 r₁ + r₂）：</div>
+              <div id="m4-tex-2"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div class="text-xs text-slate-400 mb-1.5">3. 各公切線的長度、斜率與方程式：</div>
+              <div id="m4-tan-list" class="space-y-1 text-xs font-mono"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-purple-950/30 border border-purple-500/30">
+              <div class="text-xs text-purple-300 font-semibold mb-1">4. 根軸方程式（C₁ − C₂ = 0）：</div>
+              <div id="m4-tex-3"></div>
+            </div>
+          `;
+          const tans = this.getTangents();
+          document.getElementById('m4-tan-list').innerHTML = tans.length
+            ? tans.map((t, i) => {
+                const n = tans.filter((x, j) => j <= i && x.type === t.type).length;
+                const col = t.type === '外' ? 'text-emerald-300' : 'text-amber-300';
+                return `<div class="flex flex-wrap gap-x-3 gap-y-0.5 px-2 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <span class="${col} font-bold">${t.type}公切線 ${n}</span>
+                  <span class="text-slate-200">長 ${MathUtils.fmt(t.len, 2)}</span>
+                  <span class="text-sky-300">${t.m === null ? '斜率不存在' : '斜率 ' + MathUtils.fmt(t.m, 2)}</span>
+                  <span class="text-slate-400">${t.eq}</span></div>`;
+              }).join('')
+            : '<div class="text-slate-500">此位置關係沒有公切線</div>';
+          const ra = this.getRadical();
+          renderKaTeX(document.getElementById('m4-tex-3'), ra ? MathUtils.formatLine(ra.A, ra.B, ra.C, 2) : `\\text{兩圓同心，無根軸}`);
+
+          renderKaTeX(
+            document.getElementById('m4-tex-1'),
+            `L_{\\text{外}} = \\sqrt{d^2 - (r_1 - r_2)^2} = \\sqrt{${MathUtils.fmt(d, 2)}^2 - ${diffR}^2} = ${extLen}`
+          );
+          renderKaTeX(
+            document.getElementById('m4-tex-2'),
+            `L_{\\text{內}} = \\sqrt{d^2 - (r_1 + r_2)^2} = \\sqrt{${MathUtils.fmt(d, 2)}^2 - ${sumR}^2} = ${intLen}`
+          );
+
+          document.getElementById('concept-notes').innerHTML = `
+            <p>• <strong>口訣記憶</strong>：外公切線段長用<strong>半徑差</strong> $\\sqrt{d^2 - (r_1 - r_2)^2}$，內公切線段長用<strong>半徑和</strong> $\\sqrt{d^2 - (r_1 + r_2)^2}$，斜邊永遠是連心線長 $d$。</p>
+            <p>• <strong>存在條件</strong>：當兩圓<strong>外切</strong> ($d = r_1 + r_2$) 時，內公切線段長縮為 $0$；當兩圓<strong>內切</strong> ($d = |r_1 - r_2|$) 時，外公切線段長縮為 $0$。</p>
+          `;
+          renderInlineMath(document.getElementById('concept-notes'));
+        },
+      },
+
+      // --------------------------------------------------------------------------
+      // 模組六：阿波羅尼斯圓（Apollonius' Circle）
+      // --------------------------------------------------------------------------
+      {
+        id: 5,
+        shortTitle: '05 阿波羅尼斯圓',
+        fullTitle: '阿波羅尼斯圓（Apollonius\' Circle）：距離定比軌跡',
+        hint: '拖曳定點 A, B 或軌跡上的動點 P，觀察 PA : PB 恆等於定值 k；將 k 設為 1 則退化為中垂線！',
+        defaultState() {
+          return {
+            ax: -3, ay: 0,
+            bx: 2, by: 0,
+            k: 2.0,
+            psi: 1.0, // angle on circle or parameter along perpendicular bisector
+          };
+        },
+        state: null,
+        init() {
+          this.state = this.defaultState();
+        },
+        reset() {
+          this.state = this.defaultState();
+        },
+        getLocusInfo() {
+          const { ax, ay, bx, by, k } = this.state;
+          const ab = MathUtils.dist(ax, ay, bx, by);
+          if (Math.abs(k - 1) < 1e-4) {
+            // Perpendicular bisector: 2(bx - ax)x + 2(by - ay)y + (ax^2 + ay^2 - bx^2 - by^2) = 0
+            return {
+              isLine: true,
+              A: 2 * (bx - ax),
+              B: 2 * (by - ay),
+              C: ax * ax + ay * ay - bx * bx - by * by,
+              ab,
+            };
+          }
+          const denom = 1 - k * k;
+          const hk = (ax - k * k * bx) / denom;
+          const kk = (ay - k * k * by) / denom;
+          const rk = (k * ab) / Math.abs(denom);
+          return {
+            isLine: false,
+            hk,
+            kk,
+            rk,
+            ab,
+          };
+        },
+        // 讓動點 P 落在 AB 附近可視範圍（k 接近 1 時圓半徑很大，原角度會讓 P 跑出畫面）
+        focusP() {
+          const info = this.getLocusInfo();
+          if (info.isLine) { this.state.psi = 2.5; return; }
+          if (info.rk < 1e-6) return;
+          const { ax, ay, bx, by } = this.state;
+          const base = Math.atan2((ay + by) / 2 - info.kk, (ax + bx) / 2 - info.hk);
+          this.state.psi = base + Math.min(1.2, 3 / info.rk);
+        },
+        getPointPOnLocus() {
+          const { ax, ay, bx, by, psi } = this.state;
+          const info = this.getLocusInfo();
+          if (info.isLine) {
+            const mx = (ax + bx) / 2;
+            const my = (ay + by) / 2;
+            const ab = Math.max(1e-5, info.ab);
+            const nx = -(by - ay) / ab;
+            const ny = (bx - ax) / ab;
+            return { x: mx + psi * nx, y: my + psi * ny };
+          }
+          return {
+            x: info.hk + info.rk * Math.cos(psi),
+            y: info.kk + info.rk * Math.sin(psi),
+          };
+        },
+        getDraggablePoints() {
+          const P = this.getPointPOnLocus();
+          return [
+            { id: 'A', x: this.state.ax, y: this.state.ay },
+            { id: 'B', x: this.state.bx, y: this.state.by },
+            { id: 'P', x: P.x, y: P.y },
+          ];
+        },
+        onDragPoint(id, wx, wy) {
+          if (id === 'A') {
+            this.state.ax = Math.round(wx * 10) / 10;
+            this.state.ay = Math.round(wy * 10) / 10;
+          } else if (id === 'B') {
+            this.state.bx = Math.round(wx * 10) / 10;
+            this.state.by = Math.round(wy * 10) / 10;
+          } else if (id === 'P') {
+            const info = this.getLocusInfo();
+            if (info.isLine) {
+              const { ax, ay, bx, by } = this.state;
+              const mx = (ax + bx) / 2;
+              const my = (ay + by) / 2;
+              const ab = Math.max(1e-5, info.ab);
+              const nx = -(by - ay) / ab;
+              const ny = (bx - ax) / ab;
+              this.state.psi = Math.max(-7, Math.min(7, (wx - mx) * nx + (wy - my) * ny));
+            } else {
+              this.state.psi = Math.atan2(wy - info.kk, wx - info.hk);
+            }
+          }
+        },
+        renderControls(container, onUpdate) {
+          const s = this.state;
+          container.innerHTML = `
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-semibold text-sky-300">距離比值 k = PA / PB ∈ [0.2, 4.0]</span>
+                <span class="font-mono font-bold text-sky-300 text-sm" id="m6-val-k">${s.k.toFixed(2)}</span>
+              </div>
+              <input type="range" id="m6-k" min="0.2" max="4.0" step="0.05" value="${s.k}" class="w-full" />
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button id="m6-set-1" class="px-3 py-1.5 rounded-lg bg-amber-500/25 hover:bg-amber-500/40 text-amber-200 border border-amber-500/50 text-xs font-semibold transition">
+                  🎯 設為 k = 1（退化為中垂線）
+                </button>
+                <button id="m6-set-2" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs transition">
+                  k = 2.0
+                </button>
+                <button id="m6-set-half" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs transition">
+                  k = 0.5
+                </button>
+              </div>
+            </div>
+          `;
+
+          const kSlider = document.getElementById('m6-k');
+          kSlider.addEventListener('input', (e) => {
+            let v = parseFloat(e.target.value);
+            if (Math.abs(v - 1) < 0.04) {
+              v = 1.0;
+              kSlider.value = 1.0;
+            }
+            this.state.k = v;
+            this.focusP();
+            document.getElementById('m6-val-k').textContent = v.toFixed(2);
+            onUpdate();
+          });
+
+          document.getElementById('m6-set-1').addEventListener('click', () => {
+            this.state.k = 1.0;
+            this.state.psi = 2.5;
+            kSlider.value = 1.0;
+            document.getElementById('m6-val-k').textContent = '1.00';
+            onUpdate();
+          });
+          document.getElementById('m6-set-2').addEventListener('click', () => {
+            this.state.k = 2.0;
+            this.focusP();
+            kSlider.value = 2.0;
+            document.getElementById('m6-val-k').textContent = '2.00';
+            onUpdate();
+          });
+          document.getElementById('m6-set-half').addEventListener('click', () => {
+            this.state.k = 0.5;
+            this.focusP();
+            kSlider.value = 0.5;
+            document.getElementById('m6-val-k').textContent = '0.50';
+            onUpdate();
+          });
+        },
+        render(vp) {
+          const { ax, ay, bx, by, k } = this.state;
+          vp.clear();
+          vp.drawGrid();
+
+          // Segment AB
+          vp.drawSegment(ax, ay, bx, by, { color: 'rgba(148, 163, 184, 0.45)', dashed: true, lineWidth: 1.4 });
+
+          const info = this.getLocusInfo();
+          if (info.isLine) {
+            vp.drawInfiniteLine(info.A, info.B, info.C, {
+              color: '#fbbf24',
+              lineWidth: 2.8,
+              label: 'k = 1 退化為 AB 中垂線',
+            });
+          } else {
+            vp.drawCircle(info.hk, info.kk, info.rk, {
+              color: '#38bdf8',
+              fill: 'rgba(56, 189, 248, 0.06)',
+              lineWidth: 2.6,
+            });
+            vp.drawPoint(info.hk, info.kk, { color: '#38bdf8', radius: 3.5, label: '軌跡圓心', offsetY: 14 });
+          }
+
+          // Movable point P on locus & segments PA, PB
+          const P = this.getPointPOnLocus();
+          const pa = MathUtils.dist(P.x, P.y, ax, ay);
+          const pb = MathUtils.dist(P.x, P.y, bx, by);
+
+          vp.drawSegment(P.x, P.y, ax, ay, { color: '#34d399', dashed: true, lineWidth: 2, label: `PA=${MathUtils.fmt(pa, 2)}` });
+          vp.drawSegment(P.x, P.y, bx, by, { color: '#f472b6', dashed: true, lineWidth: 2, label: `PB=${MathUtils.fmt(pb, 2)}` });
+
+          vp.drawPoint(ax, ay, { color: '#34d399', draggable: true, label: `A(${MathUtils.fmt(ax, 1)}, ${MathUtils.fmt(ay, 1)})`, offsetY: 16 });
+          vp.drawPoint(bx, by, { color: '#f472b6', draggable: true, label: `B(${MathUtils.fmt(bx, 1)}, ${MathUtils.fmt(by, 1)})`, offsetY: 16 });
+          vp.drawPoint(P.x, P.y, {
+            color: '#fbbf24',
+            haloColor: 'rgba(251, 191, 36, 0.3)',
+            draggable: true,
+            label: `動點 P (PA/PB = ${pb > 1e-5 ? MathUtils.fmt(pa / pb, 2) : k.toFixed(2)})`,
+          });
+
+          document.getElementById('canvas-legend').innerHTML = `
+            <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-sky-500/40 text-sky-300">━━ ${info.isLine ? '黃線：k=1 時退化為線段 AB 中垂線' : '藍圓：阿波羅尼斯圓軌跡'}</span>
+            <span class="px-2 py-0.5 rounded bg-slate-900/90 border border-amber-500/40 text-amber-300">● 拖曳動點 P 驗證 PA : PB 恆等於 ${k.toFixed(2)}</span>
+          `;
+        },
+        updateDashboard() {
+          const { ax, ay, bx, by, k } = this.state;
+          const info = this.getLocusInfo();
+          const P = this.getPointPOnLocus();
+          const pa = MathUtils.dist(P.x, P.y, ax, ay);
+          const pb = MathUtils.dist(P.x, P.y, bx, by);
+
+          const statusPill = document.getElementById('status-pill');
+          document.getElementById('alert-banner').classList.add('hidden');
+          if (info.isLine) {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/25 text-amber-200 border border-amber-500/50';
+            statusPill.textContent = 'k = 1 → 退化為中垂線（半徑 → ∞）';
+          } else {
+            statusPill.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/40';
+            statusPill.textContent = `阿波羅尼斯圓 (半徑 R = ${MathUtils.fmt(info.rk, 2)})`;
+          }
+
+          document.getElementById('metrics-grid').innerHTML = `
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">即時線段長 PA 與 PB</div>
+              <div class="text-sm font-mono font-bold text-white mt-0.5">PA = ${MathUtils.fmt(pa, 2)}, PB = ${MathUtils.fmt(pb, 2)}</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/70">
+              <div class="text-xs text-slate-400">即時比值 PA / PB</div>
+              <div class="text-base font-mono font-bold text-amber-300 mt-0.5">${pb > 1e-5 ? MathUtils.fmt(pa / pb, 3) : k.toFixed(3)} (設定 k = ${k.toFixed(2)})</div>
+            </div>
+          `;
+
+          document.getElementById('math-derivation').innerHTML = `
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div class="text-xs text-slate-400 mb-1">1. 軌跡定義式 PA = k · PB 兩邊平方：</div>
+              <div id="m6-tex-1"></div>
+            </div>
+            <div class="p-3 rounded-xl bg-sky-950/40 border border-sky-500/30">
+              <div class="text-xs text-sky-300 font-semibold mb-1">2. 化簡後軌跡方程式：</div>
+              <div id="m6-tex-2"></div>
+            </div>
+          `;
+
+          renderKaTeX(
+            document.getElementById('m6-tex-1'),
+            `(x - x_A)^2 + (y - y_A)^2 = ${k.toFixed(2)}^2\\left[(x - x_B)^2 + (y - y_B)^2\\right]`
+          );
+          if (info.isLine) {
+            renderKaTeX(
+              document.getElementById('m6-tex-2'),
+              `\\text{中垂線：} ${MathUtils.formatLine(info.A, info.B, info.C, 2)}`
+            );
+          } else {
+            renderKaTeX(
+              document.getElementById('m6-tex-2'),
+              `${MathUtils.shiftVar('x', info.hk)}^2 + ${MathUtils.shiftVar('y', info.kk)}^2 = ${MathUtils.fmt(info.rk, 2)}^2`
+            );
+          }
+
+          document.getElementById('concept-notes').innerHTML = `
+            <p>• <strong>幾何快速作圖法（內外分點定直徑）</strong>：直線 $AB$ 上滿足 $\\overline{PA}:\\overline{PB} = k$ 的<strong>內分點 $M$</strong> 與<strong>外分點 $N$</strong>，恰為阿波羅尼斯圓的<strong>直徑兩端點</strong>（因內外角平分線互相垂直 $\\angle MPN = 90^\\circ$）。</p>
+          `;
+          renderInlineMath(document.getElementById('concept-notes'));
+        },
+      },
+    ];
+
+    /**
+     * ============================================================================
+     * 主應用程式控制器 (Main Application Controller)
+     * ============================================================================
+     */
+    const App = {
+      currentIndex: 0,
+      vpMain: null,
+      draggingPointId: null,
+      activeVp: null, // 目前正在拖曳 / 平移的畫布（避免兩個畫布的 window 監聽互相覆蓋）
+      isPanning: false,
+      lastPointer: { x: 0, y: 0 },
+
+      init() {
+        Modules.forEach((m) => m.init());
+
+        this.vpMain = new CoordinateViewport(document.getElementById('main-canvas'));
+
+        this.renderTabs();
+        this.bindCanvasEvents(this.vpMain);
+        this.bindGlobalButtons();
+
+        window.addEventListener('resize', () => this.handleResize());
+        this.selectModule(0);
+
+      },
+
+      renderTabs() {
+        const tabsContainer = document.getElementById('module-tabs');
+        tabsContainer.innerHTML = Modules.map(
+          (m, idx) => `
+          <button
+            data-idx="${idx}"
+            class="module-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition border ${
+              idx === this.currentIndex
+                ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-md shadow-sky-500/25'
+                : 'bg-slate-800/70 text-slate-300 border-slate-700/80 hover:bg-slate-800 hover:text-white'
+            }"
+          >
+            ${m.shortTitle}
+          </button>
+        `
+        ).join('');
+
+        tabsContainer.querySelectorAll('.module-tab').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            this.selectModule(parseInt(btn.dataset.idx, 10));
+          });
+        });
+      },
+
+      selectModule(index) {
+        this.currentIndex = index;
+        this.draggingPointId = null;
+        this.renderTabs();
+
+        const mod = Modules[index];
+        document.getElementById('btn-zoom-reset').textContent = `${Math.round(this.vpMain.zoom * 100)}%`;
+        document.getElementById('canvas-badge').textContent = mod.fullTitle;
+        document.getElementById('canvas-hint').textContent = mod.hint;
+
+        mod.renderControls(document.getElementById('controls-panel'), () => this.renderCurrent());
+        this.handleResize();
+      },
+
+      handleResize() {
+        const mod = Modules[this.currentIndex];
+        this.vpMain.resize();
+        this.renderCurrent();
+      },
+
+      renderCurrent(skipDashboard = false) {
+        const mod = Modules[this.currentIndex];
+        mod.render(this.vpMain);
+        if (!skipDashboard) mod.updateDashboard();
+      },
+
+      bindCanvasEvents(vp) {
+        const canvas = vp.canvas;
+
+        const getPos = (e) => {
+          const rect = canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return { x: clientX - rect.left, y: clientY - rect.top };
+        };
+
+        const onDown = (e) => {
+          this.activeVp = vp;
+          const pos = getPos(e);
+          const mod = Modules[this.currentIndex];
+          const points = mod.getDraggablePoints();
+          let hitId = null;
+          let minDist = 26; // generous touch/mouse hit radius in px
+
+          points.forEach((pt) => {
+            const sp = vp.toScreen(pt.x, pt.y);
+            const d = Math.hypot(sp.x - pos.x, sp.y - pos.y);
+            if (d < minDist) {
+              minDist = d;
+              hitId = pt.id;
+            }
+          });
+
+          if (hitId) {
+            this.draggingPointId = hitId;
+            canvas.style.cursor = 'grabbing';
+          } else {
+            this.isPanning = true;
+            this.lastPointer = pos;
+            canvas.style.cursor = 'move';
+          }
+        };
+
+        const onMove = (e) => {
+          const busy = this.draggingPointId || this.isPanning;
+          if (busy && this.activeVp !== vp) return;                       // 別的畫布正在操作
+          if (!busy && e.type === 'mousemove' && e.target !== canvas) return; // 游標不在此畫布上
+          const pos = getPos(e);
+          const world = vp.toWorld(pos.x, pos.y);
+          const coordsEl = document.getElementById('cursor-coords');
+          if (coordsEl) {
+            coordsEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>游標座標：(${MathUtils.fmt(world.x, 1)}, ${MathUtils.fmt(world.y, 1)})</span>`;
+          }
+
+          const mod = Modules[this.currentIndex];
+          if (this.draggingPointId) {
+            e.preventDefault();
+            mod.onDragPoint(this.draggingPointId, world.x, world.y);
+            this.renderCurrent();
+          } else if (this.isPanning) {
+            e.preventDefault();
+            vp.panX += pos.x - this.lastPointer.x;
+            vp.panY += pos.y - this.lastPointer.y;
+            this.lastPointer = pos;
+            this.renderCurrent();
+          } else {
+            // Hover cursor feedback
+            const points = mod.getDraggablePoints();
+            const hovering = points.some((pt) => {
+              const sp = vp.toScreen(pt.x, pt.y);
+              return Math.hypot(sp.x - pos.x, sp.y - pos.y) < 22;
+            });
+            canvas.style.cursor = hovering ? 'grab' : 'crosshair';
+          }
+        };
+
+        const onUp = () => {
+          if (this.activeVp && this.activeVp !== vp) return;
+          this.activeVp = null;
+          this.draggingPointId = null;
+          this.isPanning = false;
+          canvas.style.cursor = 'crosshair';
+        };
+
+        canvas.addEventListener('mousedown', onDown);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+
+        canvas.addEventListener('touchstart', onDown, { passive: false });
+        canvas.addEventListener('touchmove', onMove, { passive: false });
+        canvas.addEventListener('touchend', onUp);
+        canvas.addEventListener('touchcancel', onUp);
+      },
+
+      bindGlobalButtons() {
+        document.getElementById('btn-reset-module').addEventListener('click', () => {
+          const mod = Modules[this.currentIndex];
+          mod.reset();
+          this.vpMain.resetView();
+          document.getElementById('btn-zoom-reset').textContent = '100%';
+          mod.renderControls(document.getElementById('controls-panel'), () => this.renderCurrent());
+          this.renderCurrent();
+        });
+
+        const updateZoomLabel = (vp) => {
+          document.getElementById('btn-zoom-reset').textContent = `${Math.round(vp.zoom * 100)}%`;
+        };
+
+        document.getElementById('btn-zoom-in').addEventListener('click', () => {
+          const vp = this.vpMain;
+          vp.zoom = Math.min(2.5, vp.zoom + 0.15);
+          updateZoomLabel(vp);
+          this.renderCurrent();
+        });
+
+        document.getElementById('btn-zoom-out').addEventListener('click', () => {
+          const vp = this.vpMain;
+          vp.zoom = Math.max(0.5, vp.zoom - 0.15);
+          updateZoomLabel(vp);
+          this.renderCurrent();
+        });
+
+        document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+          const vp = this.vpMain;
+          vp.resetView();
+          updateZoomLabel(vp);
+          this.renderCurrent();
+        });
+      },
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      App.init();
+    });
+  </script>
+</body>
+</html>
